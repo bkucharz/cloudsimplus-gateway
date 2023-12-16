@@ -126,6 +126,7 @@ public class WrappedSimulation {
         boolean done = !cloudSimProxy.isRunning();
         double[] observation = getObservation();
         double reward = calculateReward();
+        long[] vmCounts = getVmCounts();
 
         this.simulationHistory.record("action", action);
         this.simulationHistory.record("reward", reward);
@@ -149,7 +150,8 @@ public class WrappedSimulation {
         return new SimulationStepResult(
                 done,
                 observation,
-                reward
+                reward,
+                vmCounts
         );
     }
 
@@ -290,6 +292,15 @@ public class WrappedSimulation {
         final double penalty = this.cloudSimProxy.getWaitingJobsCount() * this.queueWaitPenalty * simulationSpeedUp;
         return -vmRunningCost - penalty;
     }
+
+    private long[] getVmCounts() {
+        return new long[]{
+            vmCounter.getStartedVms(CloudSimProxy.SMALL),
+            vmCounter.getStartedVms(CloudSimProxy.MEDIUM),
+            vmCounter.getStartedVms(CloudSimProxy.LARGE)
+        };
+    }
+
 
     public void seed() {
         // there is no randomness so far...
